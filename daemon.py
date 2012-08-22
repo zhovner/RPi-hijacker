@@ -330,7 +330,7 @@ while True:
 				else: 
 					print "Empty button"
 				url = urlparse(g.response.url)
-				#print ("URL with access_token: " + g.response.url)
+				# print ("URL with access_token: " + g.response.url)
 				p = parse_qs(url.fragment)
 				token = p['access_token'][0]
 
