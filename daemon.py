@@ -374,7 +374,10 @@ while True:
 					print "Status NOT set."
 				print " "
 			except Exception, err:
-				print "Error " + err
+				print "Exception catched"
+				print "Errno: " + str(err.errno)
+				print "Error message: " + str(err.message)
+				print "Str Error: " + str(err.strerror)
 
 			time.sleep(2)
 			GPIO.setup(BLUE, True)
