@@ -325,7 +325,7 @@ while True:
 				button = re.search('action=(.*")',g.response.body)
 				if(button!=None):
 					button = button.group().replace('action=','').replace('"','')
-					#print "Push the button" + button
+					# print "Push the button" + button
 					g.go(button)
 				else: 
 					print "Empty button"
