@@ -319,60 +319,62 @@ while True:
 			print 'in used',sid
 		else:
 			print ("Processing: " + sid)
-			g.setup(cookies={'remixsid': sid})
-			g.go('https://oauth.vk.com/authorize?client_id=2971856&scope=1028&display=wap&response_type=token')
-			button = re.search('action=(.*")',g.response.body)
-			if(button!=None):
-				button = button.group().replace('action=','').replace('"','')
-				#print "Push the button" + button
-				g.go(button)
-			else: 
-				print "Empty button"
-			url = urlparse(g.response.url)
-			#print ("URL with access_token: " + g.response.url)
-			p = parse_qs(url.fragment)
-			token = p['access_token'][0]
+			try:
+				g.setup(cookies={'remixsid': sid})
+				g.go('https://oauth.vk.com/authorize?client_id=2971856&scope=1028&display=wap&response_type=token')
+				button = re.search('action=(.*")',g.response.body)
+				if(button!=None):
+					button = button.group().replace('action=','').replace('"','')
+					#print "Push the button" + button
+					g.go(button)
+				else: 
+					print "Empty button"
+				url = urlparse(g.response.url)
+				#print ("URL with access_token: " + g.response.url)
+				p = parse_qs(url.fragment)
+				token = p['access_token'][0]
 
-			#Get sex and name
-			g.go('https://api.vk.com/method/users.get.json?uids=' + p['user_id'][0] + '&fields=sex,&access_token=' + token)
-			j = json.loads(g.response.body)
-			uid = j['response'][0]['uid']
-			sex = j['response'][0]['sex']
-			first_name = j['response'][0]['first_name']
-			last_name = j['response'][0]['last_name']
-			if (sex == 1):
-				print "We have a girl!"
-			print "http://vk.com/"+ str(uid) + "(Name Here)"
+				#Get sex and name
+				g.go('https://api.vk.com/method/users.get.json?uids=' + p['user_id'][0] + '&fields=sex,&access_token=' + token)
+				j = json.loads(g.response.body)
+				uid = j['response'][0]['uid']
+				sex = j['response'][0]['sex']
+				first_name = j['response'][0]['first_name']
+				last_name = j['response'][0]['last_name']
+				if (sex == 1):
+					print "We have a girl!"
+				print "http://vk.com/"+ str(uid) + "(Name Here)"
 
-			#Get ProfileUploadServer URL
-			g.go('https://api.vk.com/method/photos.getProfileUploadServer.json?access_token='+token)
-			j = json.loads(g.response.body)
-			#print ("Photo Upload URL: " + j['response']['upload_url'])
+				#Get ProfileUploadServer URL
+				g.go('https://api.vk.com/method/photos.getProfileUploadServer.json?access_token='+token)
+				j = json.loads(g.response.body)
+				#print ("Photo Upload URL: " + j['response']['upload_url'])
 
-			#Multipart POST file
-			g.setup(cookies={'remixsid': sid},multipart_post={'photo': UploadFile(avatar)})
-			g.go(j['response']['upload_url'])
-			j = json.loads(g.response.body)
+				#Multipart POST file
+				g.setup(cookies={'remixsid': sid},multipart_post={'photo': UploadFile(avatar)})
+				g.go(j['response']['upload_url'])
+				j = json.loads(g.response.body)
 
-			#SaveProfilePhoto
-			g.go('https://api.vk.com/method/photos.saveProfilePhoto.json?hash=' + j['hash'] + '&photo=' + j['photo'] + '&server=' + str(j['server']) + '&access_token=' + token)
-			j = json.loads(g.response.body)
-			if (j['response']['saved'] == 1):
-				print "Avatar uploaded!"
-				GPIO.setup(BLUE, False)
-			else: 
-				print "Avatar NOT changed"
+				#SaveProfilePhoto
+				g.go('https://api.vk.com/method/photos.saveProfilePhoto.json?hash=' + j['hash'] + '&photo=' + j['photo'] + '&server=' + str(j['server']) + '&access_token=' + token)
+				j = json.loads(g.response.body)
+				if (j['response']['saved'] == 1):
+					print "Avatar uploaded!"
+					GPIO.setup(BLUE, False)
+				else: 
+					print "Avatar NOT changed"
 
-			#Set status if girl
-			g.go('https://api.vk.com/method/status.set.json?text=' + girl_status + '&access_token=' + token)
-			j = json.loads(g.response.body)
-			if (j['response'] == 1):
-				print "Status " + girl_status + " set."
-				GPIO.setup(ORANGE, False)
-			else:
-				print "Status NOT set."
-			print " "
-
+				#Set status if girl
+				g.go('https://api.vk.com/method/status.set.json?text=' + girl_status + '&access_token=' + token)
+				j = json.loads(g.response.body)
+				if (j['response'] == 1):
+					print "Status " + girl_status + " set."
+					GPIO.setup(ORANGE, False)
+				else:
+					print "Status NOT set."
+				print " "
+			except Exception, err:
+				print "Error " + err
 
 			time.sleep(2)
 			GPIO.setup(BLUE, True)
